@@ -4,7 +4,7 @@
 export type ThemeOption = "system" | "light" | "dark";
 
 export type CompanyEntry = {
-  id: number;
+  id: string; // uuid from supabase
   companyOption: string; // value from dropdown
   customCompany: string; // if "Custom" or user-typed
   payRate: string;       // hourly rate as string

@@ -152,120 +152,34 @@ export default function HomeScreen() {
     return sec?.rate ?? 17.5;
   }, [taxCode, incomeKey]);
 
-  //
-  // GET EXISTING DAY RECORD
-  //
-  const existingDay = savedDays.find((d) => d.date === selectedDate);
-  const nextId =
-    existingDay && existingDay.companies.length > 0
-      ? Math.max(...existingDay.companies.map((c) => c.id)) + 1
-      : 1;
-
-  //
   // SAVE ENTRY
-  //
   const handleSave = async () => {
     const name = selectedCompany === "__custom" ? customCompany.trim() : selectedCompany;
     if (!name) return Alert.alert("Select company");
     if (!payRate || isNaN(+payRate)) return Alert.alert("Invalid pay rate");
     if (!hours || isNaN(+hours)) return Alert.alert("Invalid hours");
 
-    let gross = +payRate * +hours;
-
-    // 🔵 Add 8% Holiday Pay if enabled
-    if (holidayPayEnabled) {
-      gross = gross * 1.08;
-    }
-
-    const tax = (gross * taxRate) / 100;
-    const net = gross - tax;
-
-    const entry: CompanyEntry = {
-      id: nextId,
+    await addShift(selectedDate, {
       companyOption: selectedCompany,
       customCompany,
       payRate,
       hoursWorked: hours,
       taxCode,
       incomeBracketKey: incomeKey,
-    };
+    });
 
-    let newDay: DayRecord;
-
-    if (!existingDay) {
-      newDay = {
-        date: selectedDate,
-        companies: [entry],
-        totalGross: gross,
-        totalTax: tax,
-        totalNet: net,
-      };
-    } else {
-      const all = [...existingDay.companies, entry];
-
-      let totalGross = 0;
-      all.forEach((c) => {
-        let g = +c.payRate * +c.hoursWorked;
-        if (holidayPayEnabled) g *= 1.08;
-        totalGross += g;
-      });
-
-      const totalTax = (totalGross * taxRate) / 100;
-      const totalNet = totalGross - totalTax;
-
-      newDay = {
-        ...existingDay,
-        companies: all,
-        totalGross,
-        totalTax,
-        totalNet,
-      };
-    }
-
-    await addOrUpdateDayRecord(newDay);
-
-    // Reset
+    // Reset fields
     setSelectedCompany("");
     setCustomCompany("");
     setPayRate("");
     setHours("");
 
-    Alert.alert("Saved", "Shift saved!");
+    Alert.alert("Saved", "Shift saved securely to the cloud!");
   };
 
-  //
   // DELETE ENTRY
-  //
-  const deleteEntry = async (id: number) => {
-    if (!existingDay) return;
-
-    const remaining = existingDay.companies.filter((c) => c.id !== id);
-
-    if (remaining.length === 0) {
-      const newDays = savedDays.filter((d) => d.date !== selectedDate);
-      await useAppStore.getState().setSavedDays(newDays);
-      return;
-    }
-
-    let totalGross = 0;
-    remaining.forEach((c) => {
-      let g = +c.payRate * +c.hoursWorked;
-      if (holidayPayEnabled) g *= 1.08;
-      totalGross += g;
-    });
-
-    const totalTax = (totalGross * taxRate) / 100;
-    const totalNet = totalGross - totalTax;
-
-    const updated: DayRecord = {
-      ...existingDay,
-      companies: remaining,
-      totalGross,
-      totalTax,
-      totalNet,
-    };
-
-    await addOrUpdateDayRecord(updated);
+  const deleteEntry = async (id: string) => {
+    await useAppStore.getState().deleteShift(id);
   };
 
   //
