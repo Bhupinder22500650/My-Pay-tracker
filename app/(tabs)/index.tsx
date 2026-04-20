@@ -163,6 +163,11 @@ export default function HomeScreen() {
         holidayPay: holidayPayEnabled,
       });
 
+      // Automatically remember this company for the future if using a custom one
+      if (selectedCompany === "__custom" && customCompany.trim()) {
+        await useAppStore.getState().addCompanyOption(customCompany.trim());
+      }
+
       setSelectedCompany("");
       setCustomCompany("");
       setPayRate("");
