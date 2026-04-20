@@ -1,12 +1,24 @@
 // app/_layout.tsx
-// 🔹 Root layout with AuthProvider and SafeArea
+// 🔹 Root layout — SafeAreaProvider → QueryClientProvider → AuthProvider → InitialLayout
 
 import { Stack, useRouter, useSegments } from "expo-router";
 import { AuthProvider, useAuth } from "../components/AuthProvider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAppStore } from "../lib/store";
+
+// One shared QueryClient for the whole app.
+// staleTime: 30 s — data is considered fresh for 30 seconds before a background refetch.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: 2,
+    },
+  },
+});
 
 function InitialLayout() {
   const { session, isLoading } = useAuth();
@@ -19,14 +31,10 @@ function InitialLayout() {
     const inAuthGroup = segments[0] === "(auth)";
 
     if (!session && !inAuthGroup) {
-      // User is not signed in and trying to access a secure screen
       router.replace("/(auth)/login");
     } else if (session) {
-      // User is signed in. Let's make sure cloud data is fetched instantly.
       useAppStore.getState().loadFromCloud();
-      
       if (inAuthGroup) {
-        // trying to access the login/register screen while logged in -> redirect 
         router.replace("/(tabs)");
       }
     }
@@ -35,26 +43,24 @@ function InitialLayout() {
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" }}>
-        <ActivityIndicator size="large" color="#0A84FF" />
+        <ActivityIndicator size="large" color="#6B4EFF" />
       </View>
     );
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <Stack screenOptions={{ headerShown: false }} />
   );
 }
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <InitialLayout />
-      </AuthProvider>
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <InitialLayout />
+        </AuthProvider>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }
