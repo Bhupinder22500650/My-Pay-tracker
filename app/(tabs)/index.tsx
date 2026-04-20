@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAppStore } from "../../lib/appStore";
+import { useAppStore } from "../../lib/store";
 import { calculateTax, ALL_TAX_CODES, isPrimaryCode } from "../../lib/taxEngine";
 
 // Income bracket labels — for display only when using progressive (M/ME) codes

@@ -6,7 +6,7 @@ import { Tabs } from "expo-router";
 import { useEffect } from "react";
 import { Appearance } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAppStore } from "../../lib/appStore";
+import { useAppStore } from "../../lib/store";
 import { Colors } from "../../constants/DesignSystem";
 
 export default function TabsLayout() {

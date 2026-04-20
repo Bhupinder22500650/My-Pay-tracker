@@ -6,7 +6,7 @@ import { AuthProvider, useAuth } from "../components/AuthProvider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
-import { useAppStore } from "../lib/appStore";
+import { useAppStore } from "../lib/store";
 
 function InitialLayout() {
   const { session, isLoading } = useAuth();

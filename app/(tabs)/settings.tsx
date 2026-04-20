@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAppStore } from "../../lib/appStore";
+import { useAppStore } from "../../lib/store";
 import { Settings, ThemeOption } from "../../lib/types";
 import { supabase } from "../../lib/supabase";
 

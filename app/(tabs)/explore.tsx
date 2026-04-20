@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAppStore } from "../../lib/appStore";
+import { useAppStore } from "../../lib/store";
 import { calculateTax } from "../../lib/taxEngine";
 
 type RangeKey = "week" | "month" | "year" | "all";
