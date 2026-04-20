@@ -13,8 +13,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAppStore } from "../store/appStore";
-import { Settings, ThemeOption } from "../types";
+import { useAppStore } from "../../lib/appStore";
+import { Settings, ThemeOption } from "../../lib/types";
 import { supabase } from "../../lib/supabase";
 
 const TAX_CODES = ["M", "S", "SH", "ST", "SB", "SL", "ME", "SB SL"];
@@ -248,13 +248,12 @@ export default function SettingsScreen() {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>About MyPayTracker</Text>
           <Text style={styles.aboutText}>
-            MyPayTracker helps shift workers quickly calculate hours, tax and
-            take-home pay, keep a day-by-day history, and stay on top of long-term
-            savings goals.
+            MyPayTracker helps shift workers quickly calculate hours, NZ PAYE tax,
+            and take-home pay. Keep a day-by-day history and stay on top of long-term savings goals.
           </Text>
           <Text style={styles.aboutTextSmall}>
-            Built with React Native + Expo, powered by local storage (no
-            external servers). Your data stays on your device.
+            Built with React Native + Expo, powered by Supabase. Your data is
+            securely stored in the cloud and synced across your devices.
           </Text>
         </View>
       </ScrollView>

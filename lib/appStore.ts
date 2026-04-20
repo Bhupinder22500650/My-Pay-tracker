@@ -1,9 +1,9 @@
-// app/store/appStore.ts
+// lib/appStore.ts
 // 🔹 Global app state with Supabase cloud database synchronization
 
 import { create } from "zustand";
-import { supabase } from "../../lib/supabase";
-import { DayRecord, SavingsGoalState, Settings, ThemeOption, CompanyEntry } from "../types";
+import { supabase } from "./supabase";
+import { DayRecord, SavingsGoalState, Settings, ThemeOption, CompanyEntry } from "./types";
 
 export interface AppStoreState {
   // Data
@@ -12,15 +12,16 @@ export interface AppStoreState {
   savingsGoal: SavingsGoalState;
   settings: Settings;
   theme: ThemeOption;
+  isCloudLoading: boolean;
 
   // Actions
   loadFromCloud: () => Promise<void>;
-  addShift: (date: string, entry: Omit<CompanyEntry, "id">) => Promise<void>;
+  addShift: (date: string, entry: Omit<CompanyEntry, "id"> & { holidayPay?: boolean }) => Promise<void>;
   deleteShift: (id: string) => Promise<void>;
-  
+
   addCompanyOption: (name: string) => Promise<void>;
   deleteCompanyOption: (name: string) => Promise<void>;
-  
+
   setSavingsGoal: (goal: SavingsGoalState) => Promise<void>;
   setSettings: (settings: Settings) => Promise<void>;
   setTheme: (theme: ThemeOption) => Promise<void>;
@@ -33,11 +34,16 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
   savingsGoal: { goal: "", current: "" },
   settings: {},
   theme: "system",
+  isCloudLoading: true,
 
   loadFromCloud: async () => {
     try {
+      set({ isCloudLoading: true });
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        set({ isCloudLoading: false });
+        return;
+      }
 
       const [{ data: profile }, { data: shifts }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).single(),
@@ -75,64 +81,56 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
             hoursWorked: s.hours_worked.toString(),
             taxCode: s.tax_code,
             incomeBracketKey: s.income_bracket_key || undefined,
-          });
+            holidayPay: s.holiday_pay ?? false,
+          } as any);
         }
 
         const formattedDays: DayRecord[] = Object.keys(groups).map((date) => ({
           date,
           companies: groups[date],
-          totalGross: 0, // Calculated dynamically by UI
-          totalTax: 0,   // Calculated dynamically by UI
-          totalNet: 0,   // Calculated dynamically by UI
+          totalGross: 0,
+          totalTax: 0,
+          totalNet: 0,
         }));
 
         set({ savedDays: formattedDays });
       }
     } catch (error) {
       console.log("Error loading cloud data:", error);
+    } finally {
+      set({ isCloudLoading: false });
     }
   },
 
   addShift: async (date, entry) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Insert to cloud
-      await supabase.from("shifts").insert({
-        user_id: user.id,
-        date: date,
-        company_option: entry.companyOption,
-        custom_company: entry.customCompany,
-        pay_rate: parseFloat(entry.payRate),
-        hours_worked: parseFloat(entry.hoursWorked),
-        tax_code: entry.taxCode,
-        income_bracket_key: entry.incomeBracketKey
-      });
-
-      // Optimistically reload from cloud to refresh the view
-      await get().loadFromCloud();
-    } catch (error) {
-      console.log("Error saving shift:", error);
-    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+    const { error } = await supabase.from("shifts").insert({
+      user_id: user.id,
+      date,
+      company_option: entry.companyOption,
+      custom_company: entry.customCompany,
+      pay_rate: parseFloat(entry.payRate),
+      hours_worked: parseFloat(entry.hoursWorked),
+      tax_code: entry.taxCode,
+      income_bracket_key: entry.incomeBracketKey,
+      holiday_pay: (entry as any).holidayPay ?? false,
+    });
+    if (error) throw error;
+    await get().loadFromCloud();
   },
 
   deleteShift: async (id) => {
-    try {
-      await supabase.from("shifts").delete().eq("id", id);
-      await get().loadFromCloud();
-    } catch (error) {
-      console.log("Error deleting shift:", error);
-    }
+    const { error } = await supabase.from("shifts").delete().eq("id", id);
+    if (error) throw error;
+    await get().loadFromCloud();
   },
 
   addCompanyOption: async (name) => {
     const { companyOptions } = get();
     if (!name.trim()) return;
     if (companyOptions.includes(name.trim())) return;
-
     const newOptions = [...companyOptions, name.trim()];
-    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -147,7 +145,6 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
   deleteCompanyOption: async (name) => {
     const { companyOptions } = get();
     const newOptions = companyOptions.filter((item) => item !== name);
-    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -163,7 +160,7 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from("profiles").update({ 
+        await supabase.from("profiles").update({
           savings_goal: parseFloat(goal.goal) || 0,
           savings_current: parseFloat(goal.current) || 0
         }).eq("id", user.id);
@@ -176,11 +173,10 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
 
   setSettings: async (settings) => {
     const merged: Settings = { ...get().settings, ...settings };
-    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from("profiles").update({ 
+        await supabase.from("profiles").update({
           theme: merged.theme,
           haptics_enabled: merged.hapticsEnabled,
           user_name: merged.userName,
@@ -196,8 +192,7 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
   },
 
   setTheme: async (theme) => {
-    const { settings } = get();
-    const merged: Settings = { ...settings, theme };
+    const merged: Settings = { ...get().settings, theme };
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -213,23 +208,20 @@ export const useAppStore = create<AppStoreState>((set, get) => ({
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Wipe all shifts for user
         await supabase.from("shifts").delete().eq("user_id", user.id);
-        // Wipe profile array
-        await supabase.from("profiles").update({ 
+        await supabase.from("profiles").update({
           company_options: [],
           savings_goal: 0,
           savings_current: 0,
           user_name: null,
           ird_number: null,
-          theme: 'system',
+          theme: "system",
           haptics_enabled: false
         }).eq("id", user.id);
       }
     } catch (error) {
       console.log("Error clearing storage:", error);
     }
-
     set({
       savedDays: [],
       companyOptions: [],

@@ -6,28 +6,27 @@ import { Tabs } from "expo-router";
 import { useEffect } from "react";
 import { Appearance } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAppStore } from "../store/appStore";
+import { useAppStore } from "../../lib/appStore";
 import { Colors } from "../../constants/DesignSystem";
 
 export default function TabsLayout() {
-  const loadAll = useAppStore((s) => s.loadAll);
+  const loadFromCloud = useAppStore((s) => s.loadFromCloud);
   const theme = useAppStore((s) => s.theme);
   const setTheme = useAppStore((s) => s.setTheme);
 
   useEffect(() => {
     // Load data on app start
-    loadAll();
-
-    // Apply system theme if user selected "system"
-    if (theme === "system") {
-      const systemScheme = Appearance.getColorScheme();
-      if (systemScheme === "dark") {
-        setTheme("dark");
-      } else {
-        setTheme("light");
-      }
-    }
+    loadFromCloud();
   }, []);
+
+  // Separately track system appearance — don't overwrite the stored preference
+  useEffect(() => {
+    if (theme !== "system") return;
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+      // We read system scheme at render time — no need to persist
+    });
+    return () => subscription.remove();
+  }, [theme]);
 
   const insets = useSafeAreaInsets();
   const colorScheme = useAppStore((s) => s.theme) === "dark" ? "dark" : "light";

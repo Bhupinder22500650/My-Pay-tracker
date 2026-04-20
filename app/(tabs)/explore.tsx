@@ -3,6 +3,7 @@
 
 import React, { useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,7 +11,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAppStore } from "../store/appStore";
+import { useAppStore } from "../../lib/appStore";
+import { calculateTax } from "../../lib/taxEngine";
 
 type RangeKey = "week" | "month" | "year" | "all";
 
@@ -24,6 +26,7 @@ const RANGE_LABELS: Record<RangeKey, string> = {
 export default function ExploreScreen() {
   const savedDays = useAppStore((s) => s.savedDays);
   const savingsGoal = useAppStore((s) => s.savingsGoal);
+  const isCloudLoading = useAppStore((s) => s.isCloudLoading);
 
   const [range, setRange] = useState<RangeKey>("all");
 
@@ -84,27 +87,27 @@ export default function ExploreScreen() {
     > = {};
 
     filteredDays.forEach((day) => {
-      totalGrossAcc += day.totalGross;
-      totalTaxAcc += day.totalTax;
-      totalNetAcc += day.totalNet;
       day.companies.forEach((entry) => {
         const cName =
           entry.companyOption === "__custom"
             ? entry.customCompany
             : entry.companyOption || "Unknown";
-        const gross =
-          Number(entry.payRate) * Number(entry.hoursWorked || "0");
+        const grossBase = Number(entry.payRate) * Number(entry.hoursWorked || "0");
+        const grossWithHP = (entry as any).holidayPay ? grossBase * 1.08 : grossBase;
         const hours = Number(entry.hoursWorked || "0");
-        const net =
-          day.totalGross > 0 ? (gross / day.totalGross) * day.totalNet : 0;
+        const result = calculateTax(grossWithHP, entry.taxCode, 52);
+
+        totalGrossAcc += result.gross;
+        totalTaxAcc += result.tax;
+        totalNetAcc += result.net;
+        totalHoursAcc += hours;
 
         if (!companyMap[cName]) {
           companyMap[cName] = { gross: 0, net: 0, hours: 0 };
         }
-        companyMap[cName].gross += gross;
-        companyMap[cName].net += net;
+        companyMap[cName].gross += result.gross;
+        companyMap[cName].net += result.net;
         companyMap[cName].hours += hours;
-        totalHoursAcc += hours;
       });
     });
 
@@ -315,6 +318,15 @@ export default function ExploreScreen() {
           )}
         </View>
       </ScrollView>
+      {/* LOADING OVERLAY */}
+      {isCloudLoading && (
+        <View 
+          style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(255,255,255,0.6)', justifyContent: 'center', alignItems: 'center' }]} 
+          pointerEvents="none"
+        >
+          <ActivityIndicator size="large" color="#6B4EFF" />
+        </View>
+      )}
     </SafeAreaView>
   );
 }

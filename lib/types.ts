@@ -1,4 +1,4 @@
-// app/types.ts
+// lib/types.ts
 // 🔹 Shared types for MyPayTracker
 
 export type ThemeOption = "system" | "light" | "dark";
