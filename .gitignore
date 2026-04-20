@@ -47,3 +47,8 @@ app-example
 
 .env
 
+# Custom Ignore for User Data
+important.md
+improvemt.md
+.agent/
+.planning/
