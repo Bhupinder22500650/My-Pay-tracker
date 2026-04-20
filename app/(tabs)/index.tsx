@@ -17,15 +17,15 @@ import {
 import { Calendar } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../../lib/store";
-import { calculateTax, ALL_TAX_CODES, isPrimaryCode } from "../../lib/taxEngine";
+import { ALL_TAX_CODES, calculateTax, isPrimaryCode } from "../../lib/taxEngine";
 
 // Income bracket labels — for display only when using progressive (M/ME) codes
 const INCOME_BRACKETS = [
-  { key: "0-15600",    label: "$0 – $15,600",       periodsPerYear: 52 },
-  { key: "15601-53500", label: "$15,601 – $53,500",  periodsPerYear: 52 },
-  { key: "53501-78100", label: "$53,501 – $78,100",  periodsPerYear: 52 },
+  { key: "0-15600", label: "$0 – $15,600", periodsPerYear: 52 },
+  { key: "15601-53500", label: "$15,601 – $53,500", periodsPerYear: 52 },
+  { key: "53501-78100", label: "$53,501 – $78,100", periodsPerYear: 52 },
   { key: "78101-180000", label: "$78,101 – $180,000", periodsPerYear: 52 },
-  { key: "180000+",    label: "$180,001+",            periodsPerYear: 52 },
+  { key: "180000+", label: "$180,001+", periodsPerYear: 52 },
 ];
 
 // Map bracket key → approximate weekly periods for annualising (all 52 for weekly workers)
