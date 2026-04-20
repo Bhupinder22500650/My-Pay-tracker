@@ -107,7 +107,6 @@
 
 | Tool | Purpose |
 |---|---|
-| **GitHub Actions** | CI — TypeScript check + lint on every push/PR |
 | **EAS Build** | Standalone APK/IPA compilation |
 | **EAS Update** | Over-the-air JS updates without store review |
 
@@ -595,21 +594,7 @@ npm run typecheck           # tsc --noEmit
 
 ## 13. CI/CD Pipeline
 
-**File:** `.github/workflows/ci.yml`
-
-Runs on every push to `main` and every pull request to `main`.
-
-```yaml
-Jobs:
-  lint-and-typecheck:
-    1. Checkout code
-    2. Setup Node 20
-    3. npm ci
-    4. npx tsc --noEmit        ← TypeScript strict check
-    5. npx expo lint           ← ESLint with Expo rules
-```
-
-> When Phase 2.6 test step is uncommented in the workflow, Jest also runs in CI automatically.
+*(Disabled by request. Previously used GitHub Actions for TypeScript/Lint CI tests on push/PR.)*
 
 ---
 
@@ -751,7 +736,7 @@ eas update --channel production --message "Bug fix"
 - [x] TanStack Query (stale-while-revalidate, retry)
 - [x] react-hook-form + zod on all auth forms
 - [x] 26 PAYE unit tests — all pass
-- [x] GitHub Actions CI pipeline
+- [x] ~~GitHub Actions CI pipeline~~ (Removed)
 - [x] Design system consolidation
 
 ### 🚧 Phase 3 — Product (Next)
