@@ -12,12 +12,11 @@ import { Colors } from "../../constants/DesignSystem";
 export default function TabsLayout() {
   const loadFromCloud = useAppStore((s) => s.loadFromCloud);
   const theme = useAppStore((s) => s.theme);
-  const setTheme = useAppStore((s) => s.setTheme);
 
   useEffect(() => {
     // Load data on app start
     loadFromCloud();
-  }, []);
+  }, [loadFromCloud]);
 
   // Separately track system appearance — don't overwrite the stored preference
   useEffect(() => {

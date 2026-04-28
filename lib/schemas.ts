@@ -50,8 +50,8 @@ export const shiftSchema = z.object({
       (v) => !isNaN(parseFloat(v)) && parseFloat(v) > 0 && parseFloat(v) <= 24,
       { message: "Hours must be between 0 and 24" }
     ),
-  taxCode: z.enum(ALL_TAX_CODES as [string, ...string[]], {
-    errorMap: () => ({ message: "Please select a tax code" }),
+  taxCode: z.enum([...ALL_TAX_CODES] as [string, ...string[]], {
+    message: "Please select a tax code",
   }),
   incomeBracketKey: z.string().optional(),
   holidayPay: z.boolean().default(false),

@@ -122,7 +122,7 @@ export default function LoginScreen() {
           </View>
 
           <TouchableOpacity style={styles.switchRow} onPress={() => router.push("/(auth)/register")}>
-            <Text style={styles.switchText}>Don't have an account? <Text style={styles.switchLink}>Create one</Text></Text>
+            <Text style={styles.switchText}>Don&apos;t have an account? <Text style={styles.switchLink}>Create one</Text></Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "branchName": "ralph-loop-3y9jq",
+  "worktreePath": "/Users/bhupinderrakhra/Downloads/Projects/My-Pay-tracker/MyPayTracker-main",
+  "upstream": null,
+  "mergeBase": null,
+  "firstSeenHead": "fca2a12757afddb6ddecc87f21369a31f1d2adfe",
+  "lastSeenHead": "fca2a12757afddb6ddecc87f21369a31f1d2adfe",
+  "lastAnalyzedHead": "fca2a12757afddb6ddecc87f21369a31f1d2adfe",
+  "stale": false,
+  "staleReason": null,
+  "staleSince": null,
+  "lifecycleEvent": null,
+  "createdAt": "2026-04-22T08:57:53.806Z",
+  "updatedAt": "2026-04-22T08:57:53.806Z"
+}

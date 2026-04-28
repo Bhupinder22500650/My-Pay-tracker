@@ -38,7 +38,7 @@ function InitialLayout() {
         router.replace("/(tabs)");
       }
     }
-  }, [session, isLoading, segments]);
+  }, [session, isLoading, segments, router]);
 
   if (isLoading) {
     return (

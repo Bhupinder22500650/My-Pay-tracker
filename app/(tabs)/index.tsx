@@ -137,7 +137,7 @@ export default function HomeScreen() {
     let gross = rate * hrs;
     if (holidayPayEnabled) gross *= 1.08;
     return calculateTax(gross, taxCode, periodsPerYear);
-  }, [payRate, hours, taxCode, incomeKey, holidayPayEnabled, periodsPerYear]);
+  }, [payRate, hours, taxCode, holidayPayEnabled, periodsPerYear]);
 
   // ── SAVE ENTRY ──────────────────────────────────────────────────────────────
   const handleSave = async () => {
@@ -173,7 +173,7 @@ export default function HomeScreen() {
       setPayRate("");
       setHours("");
       Alert.alert("✅ Saved", "Shift saved to the cloud!");
-    } catch (e) {
+    } catch {
       Alert.alert("Save failed", "Could not save shift. Please check your connection and try again.");
     } finally {
       setIsSaving(false);
