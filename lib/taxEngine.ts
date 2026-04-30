@@ -26,6 +26,14 @@ const SECONDARY_RATES: Record<string, number> = {
   ME:  0.105, // handled specially with rebate — simplified here as primary
 };
 
+export const PERIODS_FOR_BRACKET: Record<string, number> = {
+  "0-15600": 52,
+  "15601-53500": 52,
+  "53501-78100": 52,
+  "78101-180000": 52,
+  "180000+": 52,
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
@@ -77,7 +85,7 @@ export function calculateTax(
   taxCode: string,
   periodsPerYear = 52
 ): TaxResult {
-  if (grossPeriod <= 0) {
+  if (grossPeriod <= 0 || isNaN(grossPeriod)) {
     return { gross: 0, tax: 0, net: 0, effectiveRate: 0 };
   }
 
