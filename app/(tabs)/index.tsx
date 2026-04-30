@@ -17,7 +17,7 @@ import {
 import { Calendar } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../../lib/store";
-import { ALL_TAX_CODES, calculateTax, isPrimaryCode } from "../../lib/taxEngine";
+import { ALL_TAX_CODES, calculateTax, isPrimaryCode, PERIODS_FOR_BRACKET } from "../../lib/taxEngine";
 
 // Income bracket labels — for display only when using progressive (M/ME) codes
 const INCOME_BRACKETS = [
@@ -29,13 +29,7 @@ const INCOME_BRACKETS = [
 ];
 
 // Map bracket key → approximate weekly periods for annualising (all 52 for weekly workers)
-const PERIODS_FOR_BRACKET: Record<string, number> = {
-  "0-15600": 52,
-  "15601-53500": 52,
-  "53501-78100": 52,
-  "78101-180000": 52,
-  "180000+": 52,
-};
+// PERIODS_FOR_BRACKET is imported from taxEngine.ts
 
 //
 // SELECT COMPONENT
@@ -104,7 +98,10 @@ export default function HomeScreen() {
     isCloudLoading,
   } = useAppStore();
 
-  const today = new Date().toISOString().slice(0, 10);
+  // Fix: Get local YYYY-MM-DD date instead of UTC
+  const localDate = new Date();
+  const offset = localDate.getTimezoneOffset() * 60000;
+  const today = new Date(localDate.getTime() - offset).toISOString().slice(0, 10);
   const [selectedDate, setSelectedDate] = useState(today);
 
   // Form state
