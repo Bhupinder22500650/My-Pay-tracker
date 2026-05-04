@@ -265,8 +265,6 @@ export default function SettingsScreen() {
             and take-home pay. Keep a day-by-day history and stay on top of long-term savings goals.
           </Text>
           <Text style={styles.aboutTextSmall}>
-            Built with React Native + Expo, powered by Supabase. Your data is
-            securely stored in the cloud and synced across your devices.
           </Text>
         </View>
       </ScrollView>
