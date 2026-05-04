@@ -68,7 +68,20 @@ export default function SettingsScreen() {
   const handleLogout = async () => {
     Alert.alert("Log Out", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
-      { text: "Log Out", style: "destructive", onPress: () => supabase.auth.signOut() },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          await supabase.auth.signOut();
+          useAppStore.setState({
+            savedDays: [],
+            settings: {},
+            theme: "system",
+            savingsGoal: { goal: "", current: "" },
+            companyOptions: [],
+          });
+        },
+      },
     ]);
   };
 
@@ -237,10 +250,10 @@ export default function SettingsScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.destructiveButton, { marginTop: 10 }]}
+            style={styles.logoutButton}
             onPress={handleLogout}
           >
-            <Text style={styles.destructiveButtonText}>Log out</Text>
+            <Text style={styles.logoutButtonText}>Log out</Text>
           </TouchableOpacity>
         </View>
 
@@ -404,6 +417,23 @@ const styles = StyleSheet.create({
   },
   destructiveButtonText: {
     color: "#EF4444",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  logoutButton: {
+    marginTop: 10,
+    backgroundColor: "#EF4444",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    shadowColor: "#EF4444",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  logoutButtonText: {
+    color: "#FFFFFF",
     fontWeight: "600",
     fontSize: 15,
   },

@@ -21,11 +21,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Get the initial session if available
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user || null);
-      setIsLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        if (error) {
+          console.log("Auth session error:", error.message);
+          if (error.message?.includes("Refresh Token")) {
+            supabase.auth.signOut();
+          }
+        }
+        setSession(session);
+        setUser(session?.user || null);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Auth session exception:", err);
+        setIsLoading(false);
+      });
 
     // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
