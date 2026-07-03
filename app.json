@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "mypaytracker",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.bhupinder.mypaytracker",
@@ -20,7 +19,6 @@
         "backgroundColor": "#18053A",
         "foregroundImage": "./assets/images/icon.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.bhupinder.mypaytracker"
     },
