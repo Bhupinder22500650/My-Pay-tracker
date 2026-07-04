@@ -17,7 +17,8 @@ import {
 import { Calendar } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../../lib/store";
-import { ALL_TAX_CODES, calculateTax, isPrimaryCode, PERIODS_FOR_BRACKET } from "../../lib/taxEngine";
+import { ALL_TAX_CODES, isPrimaryCode } from "../../lib/taxEngine";
+import { calculateShiftPay, calculateDayTotals } from "../../lib/payCalculations";
 
 // Income bracket labels — for display only when using progressive (M/ME) codes
 const INCOME_BRACKETS = [
@@ -126,15 +127,21 @@ export default function HomeScreen() {
   const existingDay = savedDays.find((d) => d.date === selectedDate);
 
   // Compute preview tax for the form
-  const periodsPerYear = PERIODS_FOR_BRACKET[incomeKey] ?? 52;
   const previewTax = useMemo(() => {
     const rate = parseFloat(payRate);
     const hrs = parseFloat(hours);
     if (!rate || !hrs || isNaN(rate) || isNaN(hrs)) return null;
-    let gross = rate * hrs;
-    if (holidayPayEnabled) gross *= 1.08;
-    return calculateTax(gross, taxCode, periodsPerYear);
-  }, [payRate, hours, taxCode, holidayPayEnabled, periodsPerYear]);
+    return calculateShiftPay({
+      id: "preview",
+      companyOption: selectedCompany,
+      customCompany,
+      payRate,
+      hoursWorked: hours,
+      taxCode,
+      incomeBracketKey: incomeKey,
+      holidayPay: holidayPayEnabled,
+    });
+  }, [payRate, hours, taxCode, holidayPayEnabled, incomeKey, selectedCompany, customCompany]);
 
   // ── SAVE ENTRY ──────────────────────────────────────────────────────────────
   const handleSave = async () => {
@@ -342,9 +349,7 @@ export default function HomeScreen() {
           ) : (
             <>
               {existingDay.companies.map((c) => {
-                const gross = parseFloat(c.payRate) * parseFloat(c.hoursWorked);
-                const grossWithHP = (c as any).holidayPay ? gross * 1.08 : gross;
-                const result = calculateTax(grossWithHP, c.taxCode, PERIODS_FOR_BRACKET[c.incomeBracketKey ?? "15601-53500"] ?? 52);
+                const result = calculateShiftPay(c);
 
                 return (
                   <View key={c.id} style={styles.entry}>
@@ -369,21 +374,9 @@ export default function HomeScreen() {
                 );
               })}
 
-              {/* Day totals computed from CompanyEntry — never trust zeroed store values */}
+              {/* Day totals computed from CompanyEntry */}
               {(() => {
-                const dayTotals = existingDay.companies.reduce(
-                  (acc, c) => {
-                    const gross = parseFloat(c.payRate) * parseFloat(c.hoursWorked);
-                    const grossWithHP = (c as any).holidayPay ? gross * 1.08 : gross;
-                    const result = calculateTax(grossWithHP, c.taxCode, PERIODS_FOR_BRACKET[c.incomeBracketKey ?? "15601-53500"] ?? 52);
-                    return {
-                      gross: acc.gross + result.gross,
-                      tax: acc.tax + result.tax,
-                      net: acc.net + result.net,
-                    };
-                  },
-                  { gross: 0, tax: 0, net: 0 }
-                );
+                const dayTotals = calculateDayTotals(existingDay.companies);
                 return (
                   <View style={styles.totalBox}>
                     <Text style={styles.totalLine}>Gross: ${dayTotals.gross.toFixed(2)}</Text>

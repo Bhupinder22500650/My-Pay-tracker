@@ -16,8 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../../lib/store";
 import { Settings, ThemeOption } from "../../lib/types";
 import { supabase } from "../../lib/supabase";
-
-const TAX_CODES = ["M", "S", "SH", "ST", "SB", "SL", "ME", "SB SL"];
+import { ALL_TAX_CODES } from "../../lib/taxEngine";
 
 export default function SettingsScreen() {
   const {
@@ -138,7 +137,7 @@ export default function SettingsScreen() {
 
           <Text style={styles.label}>Primary tax code</Text>
           <View style={styles.chipRow}>
-            {TAX_CODES.map((code) => {
+            {ALL_TAX_CODES.map((code) => {
               const active = localSettings.primaryTaxCode === code;
               return (
                 <TouchableOpacity

@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../../lib/store";
-import { calculateTax, PERIODS_FOR_BRACKET } from "../../lib/taxEngine";
+import { calculateShiftPay } from "../../lib/payCalculations";
 
 type RangeKey = "week" | "month" | "year" | "all";
 
@@ -92,11 +92,8 @@ export default function ExploreScreen() {
           entry.companyOption === "__custom"
             ? entry.customCompany
             : entry.companyOption || "Unknown";
-        const grossBase = Number(entry.payRate) * Number(entry.hoursWorked || "0");
-        const grossWithHP = (entry as any).holidayPay ? grossBase * 1.08 : grossBase;
         const hours = Number(entry.hoursWorked || "0");
-        const periodsPerYear = PERIODS_FOR_BRACKET[entry.incomeBracketKey ?? "15601-53500"] ?? 52;
-        const result = calculateTax(grossWithHP, entry.taxCode, periodsPerYear);
+        const result = calculateShiftPay(entry);
 
         totalGrossAcc += result.gross;
         totalTaxAcc += result.tax;

@@ -4,6 +4,7 @@
 
 import { supabase } from "../supabase";
 import { CompanyEntry, DayRecord } from "../types";
+import { calculateDayTotals } from "../payCalculations";
 
 export type ShiftInsert = Omit<CompanyEntry, "id"> & { holidayPay?: boolean };
 
@@ -34,13 +35,17 @@ export async function fetchShifts(userId: string): Promise<DayRecord[]> {
     } as CompanyEntry & { holidayPay: boolean });
   }
 
-  return Object.keys(groups).map((date) => ({
-    date,
-    companies: groups[date],
-    totalGross: 0, // Computed by UI from CompanyEntry — never stored
-    totalTax: 0,
-    totalNet: 0,
-  }));
+  return Object.keys(groups).map((date) => {
+    const companies = groups[date];
+    const totals = calculateDayTotals(companies);
+    return {
+      date,
+      companies,
+      totalGross: totals.gross,
+      totalTax: totals.tax,
+      totalNet: totals.net,
+    };
+  });
 }
 
 /** Insert a new shift row. */
